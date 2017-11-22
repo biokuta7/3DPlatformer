@@ -6,13 +6,20 @@ public class OnMovingPlatform : MonoBehaviour {
 
 	public LayerMask groundMask;
 	private int groundMaskValue;
+	private bool grounded = false;
 
 	void Start() {
 		groundMaskValue = groundMask.value;
 	}
 
+	public void SetGrounded(bool g) {
+		grounded = g;
+	}
+
 	void LateUpdate() {
-		CheckGround ();
+		if (grounded) {
+			CheckGround ();
+		}
 	}
 
 	void CheckGround() {
@@ -20,10 +27,10 @@ public class OnMovingPlatform : MonoBehaviour {
 		Ray ray = new Ray (transform.position + transform.up * 1.0f, transform.up * -1.0f);
 		RaycastHit hit;
 
-		if (Physics.Raycast (ray, out hit, 5.0f, groundMaskValue)) {
+		if (Physics.Raycast (ray, out hit, 10.0f, groundMaskValue)) {
 
 			ObjectPath path = hit.collider.GetComponent<ObjectPath> ();
-			if (path != null) {
+			if (path != null && (hit.distance < 2.5f || grounded)) {
 
 				Move (path);
 

@@ -17,15 +17,19 @@ public class PlayerController : MonoBehaviour {
 
 		public float yDeathThreshold = -100f;
 
+		public Vector2 checkPoint = Vector2.zero;
+
+
 		[HideInInspector]
 		public bool isGrounded = false;
 		[HideInInspector]
 		public Vector3 flatMovementVector = Vector3.zero;
 		[HideInInspector]
 		public Vector3 vertMovementVector = Vector3.zero;
-		public Vector2 checkPoint = Vector2.zero;
 		[HideInInspector]
 		public CharacterController controller;
+		[HideInInspector]
+		public OnMovingPlatform onMovingPlatform;
 
 	}
 
@@ -42,16 +46,30 @@ public class PlayerController : MonoBehaviour {
 	public AnimationSettings animationSettings;
 	void Start() {
 		cam = Camera.main;
+		movement.onMovingPlatform = GetComponent<OnMovingPlatform> ();
 		movement.controller = GetComponent<CharacterController> ();
 		animationSettings.animator = GetComponent<Animator> ();
 		Die ();
 	}
 
 	void Update() {
-		
+		RayCheck ();
 		Locomotion ();
-		LocomotionVertical ();
+
 		CheckDeath ();
+	}
+
+	void FixedUpdate() {
+		LocomotionVertical ();
+	}
+
+	void RayCheck() {
+
+		Ray forwards = new Ray (transform.position, transform.forward);
+		Ray down = new Ray (transform.position, -transform.up);
+		RaycastHit forwardsHit;
+		RaycastHit downHit;
+
 	}
 
 	void OnTriggerEnter(Collider c) {
@@ -83,6 +101,7 @@ public class PlayerController : MonoBehaviour {
 	void LocomotionVertical() {
 		//VERTICAL
 		movement.isGrounded = movement.controller.isGrounded;
+		movement.onMovingPlatform.SetGrounded (movement.isGrounded);
 		animationSettings.animator.SetBool ("isGrounded", movement.isGrounded);
 
 		if (movement.isGrounded) {
@@ -95,7 +114,7 @@ public class PlayerController : MonoBehaviour {
 
 		}
 
-		movement.vertMovementVector += new Vector3 (0.0f, -movement.gravityStrength * .015f, 0.0f);
+		movement.vertMovementVector += new Vector3 (0.0f, -movement.gravityStrength * Time.deltaTime, 0.0f);
 	}
 
 	void Locomotion() {
